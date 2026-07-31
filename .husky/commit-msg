@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+
+# 在 git commit 的时候，校验 commit message 是否符合规范
+# 如果不符合规范，阻止 commit
+# --edit 表示编辑 commit message，而不是直接阻止 commit
+# $1 是 commit message 的路径, 简单理解就是 commit message 的文件路径
+npx commitlint --edit $1

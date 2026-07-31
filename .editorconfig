@@ -1,0 +1,15 @@
+# 这个文件是一个 EditorConfig 配置文件，用于定义代码编辑器的基本格式化规则，确保不同开发者在不同编辑器中编写的代码风格一致。以下是这个配置文件的内容解释：
+
+# http://editorconfig.org
+root = true
+
+[*]
+indent_style = space
+indent_size = 4
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.md]
+trim_trailing_whitespace = false

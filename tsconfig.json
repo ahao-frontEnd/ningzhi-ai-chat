@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "target": "ES2015",
+        "lib": ["DOM", "ESNext"],
+        "allowJs": true,
+        "module": "commonjs",
+        "strict": true,
+        "esModuleInterop": true, // 允许默认导入非ES模块，简单理解就是允许使用 import x from 'y' 来导入 CommonJS 模块
+        "skipLibCheck": true, // 跳过库文件的类型检查，提升编译速度
+        "forceConsistentCasingInFileNames": true, // 强制文件名大小写一致，避免在不同操作系统上出现问题
+        "declaration": false,
+        "jsx": "preserve",
+        "experimentalDecorators": true,
+        "resolveJsonModule": true, // 允许导入 JSON 文件，TypeScript 会将 JSON 文件视为一个模块，并且会根据 JSON 文件的内容自动推断类型
+        "moduleResolution": "node", // 使用 Node.js 模块解析策略，允许使用 Node.js 风格的模块导入路径
+        "ignoreDeprecations": "6.0", // 忽略 TypeScript 6.0 版本中的弃用警告，允许继续使用已弃用的功能而不会收到编译错误
+        "noEmit": true // 不生成编译输出文件，此 tsconfig 仅作为基础配置供 eslint 及子项目继承使用
+    },
+    "$schema": "https://json.schemastore.org/tsconfig", // 指定 tsconfig.json 的 JSON Schema，提供编辑器的智能提示和验证功能, 这个是官方提供的 JSON Schema 地址，可以帮助编辑器识别 tsconfig.json 的结构和属性，提供自动补全和错误提示功能
+    "display": "Base" // 这是一个自定义属性，用于在编辑器中显示配置的名称，方便区分不同的 tsconfig 配置
+}

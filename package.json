@@ -1,0 +1,65 @@
+{
+    "name": "ningzhi-chat",
+    "version": "1.0.0",
+    "description": "",
+    "type": "module",
+    "main": "index.js",
+    "scripts": {
+        "dev": "pnpm --filter @ningzhi-chat/server dev",
+        "dev:web": "pnpm --filter @ningzhi-chat/web dev",
+        "dev:all": "pnpm -r --parallel run dev",
+        "build": "pnpm -r run build",
+        "lint": "eslint --fix",
+        "lint:style": "stylelint \"{packages,apps}/**/*.{css,scss,vue}\"",
+        "spellcheck": "cspell lint --dot --gitignore --color --cache --show-suggestions \"(packages|apps)/**/*.@(html|js|cjs|mjs|ts|tsx|css|scss|md|vue)\"",
+        "commit": "git-cz",
+        "prepare": "husky"
+    },
+    "keywords": [],
+    "author": "Ningzhi",
+    "license": "ISC",
+    "packageManager": "pnpm@10.32.1",
+    "config": {
+        "commitizen": {
+            "path": "node_modules/cz-git"
+        }
+    },
+    "lint-staged": {
+        "*.{md,json}": [
+            "prettier --cache --write --no-error-on-unmatched-pattern"
+        ],
+        "*.{css,less}": [
+            "stylelint --fix",
+            "prettier --cache --write"
+        ],
+        "*.{js,jsx,vue}": [
+            "eslint --fix",
+            "prettier --cache --write"
+        ],
+        "*.{ts,tsx}": [
+            "eslint --fix",
+            "prettier --cache --parser=typescript --write"
+        ]
+    },
+    "devDependencies": {
+        "eslint": "9.7.0",
+        "@eslint/js": "9.7.0",
+        "globals": "15.8.0",
+        "eslint-plugin-vue": "9.27.0",
+        "vue-eslint-parser": "9.4.3",
+        "eslint-plugin-simple-import-sort": "12.1.1",
+        "@typescript-eslint/parser": "7.16.1",
+        "stylelint": "16.7.0",
+        "stylelint-config-standard-vue": "1.0.0",
+        "stylelint-config-standard": "36.0.1",
+        "stylelint-config-standard-scss": "13.1.0",
+        "cspell": "8.10.4",
+        "prettier": "3.3.3",
+        "@commitlint/cli": "19.3.0",
+        "@commitlint/config-conventional": "19.2.2",
+        "husky": "9.0.11",
+        "lint-staged": "15.2.7",
+        "cz-git": "1.9.3",
+        "commitizen": "4.3.0"
+    }
+}

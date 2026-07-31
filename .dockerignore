@@ -1,0 +1,30 @@
+# 依赖与构建产物（镜像内自行安装/构建）
+**/node_modules
+**/dist
+
+# 前端源码不打进后端镜像（builder 阶段仅需 web 的 package.json 元数据）
+apps/web
+!apps/web/package.json
+
+# 敏感文件：API key 不进镜像，运行时通过 -e 注入
+**/.env
+**/.env.*
+
+# 版本控制与开发工具配置
+.git
+.gitignore
+.devcontainer
+.backup
+.trae
+.vscode
+.idea
+.husky
+
+# 缓存与日志
+.cspellcache
+*.log
+**/.vitepress
+
+# 其他无需进镜像的配置
+README.md
+.cspell

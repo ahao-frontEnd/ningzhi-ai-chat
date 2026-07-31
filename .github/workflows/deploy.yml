@@ -1,0 +1,129 @@
+name: Build and Deploy
+
+on:
+    push:
+        branches: [main]
+    workflow_dispatch:
+
+env:
+    REMOTE_DIR: /home/ubuntu/my-apps
+    IMAGE_NAME: ningzhi-chat-server
+    CADDY_CONTAINER: ningzhi-monitor-caddy
+    DOCKER_NETWORK: ningzhi-monitor-network
+
+jobs:
+    build-and-deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 10
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '22'
+                  cache: 'pnpm'
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Build frontend
+              run: pnpm --filter @ningzhi-chat/web build
+
+            - name: Prepare dist upload folder
+              run: |
+                  mkdir -p deploy-dist
+                  cp -r apps/web/dist/. deploy-dist/
+
+            - name: Setup Docker Buildx
+              uses: docker/setup-buildx-action@v3
+
+            - name: Build server image
+              uses: docker/build-push-action@v5
+              with:
+                  context: .
+                  file: apps/server/Dockerfile
+                  tags: ${{ env.IMAGE_NAME }}:latest
+                  load: true
+                  cache-from: type=gha
+                  cache-to: type=gha,mode=max
+
+            - name: Save image as tar
+              run: docker save ${{ env.IMAGE_NAME }}:latest -o server-image.tar
+
+            - name: Upload server image
+              uses: appleboy/scp-action@v0.1.7
+              with:
+                  host: ${{ secrets.SERVER_HOST }}
+                  username: ${{ secrets.SERVER_USER }}
+                  key: ${{ secrets.SSH_PRIVATE_KEY }}
+                  source: server-image.tar
+                  target: ${{ env.REMOTE_DIR }}
+
+            - name: Upload frontend dist
+              uses: appleboy/scp-action@v0.1.7
+              with:
+                  host: ${{ secrets.SERVER_HOST }}
+                  username: ${{ secrets.SERVER_USER }}
+                  key: ${{ secrets.SSH_PRIVATE_KEY }}
+                  source: 'deploy-dist/*'
+                  target: ${{ env.REMOTE_DIR }}/dist
+                  strip_components: 1
+
+            - name: Deploy on server
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.SERVER_HOST }}
+                  username: ${{ secrets.SERVER_USER }}
+                  key: ${{ secrets.SSH_PRIVATE_KEY }}
+                  script: |
+                      set -e
+
+                      echo "===== 1. 加载后端镜像 ====="
+                      docker load -i ${{ env.REMOTE_DIR }}/server-image.tar
+
+                      echo "===== 2. 重启后端容器（加入 monitor 网络） ====="
+                      docker stop ${{ env.IMAGE_NAME }} 2>/dev/null || true
+                      docker rm ${{ env.IMAGE_NAME }} 2>/dev/null || true
+                      docker run -d \
+                        --name ${{ env.IMAGE_NAME }} \
+                        --restart unless-stopped \
+                        --network ${{ env.DOCKER_NETWORK }} \
+                        -p 3000:3000 \
+                        -e DEEPSEEK_API_KEY=${{ secrets.DEEPSEEK_API_KEY }} \
+                        -e TAVILY_API_KEY=${{ secrets.TAVILY_API_KEY }} \
+                        -e ALIBABA_API_KEY=${{ secrets.ALIBABA_API_KEY }} \
+                        ${{ env.IMAGE_NAME }}:latest
+
+                      echo "===== 3. 更新前端 dist（自动检测挂载路径） ====="
+                      MOUNT_SRC=$(docker inspect ${{ env.CADDY_CONTAINER }} --format '{{range .Mounts}}{{if eq .Destination "/app/frontend/chat/dist"}}{{.Source}}{{end}}{{end}}')
+                      if [ -n "$MOUNT_SRC" ]; then
+                        echo "检测到挂载路径: $MOUNT_SRC"
+                        sudo mkdir -p "$MOUNT_SRC"
+                        sudo rm -rf "$MOUNT_SRC"/*
+                        sudo cp -r ${{ env.REMOTE_DIR }}/dist/. "$MOUNT_SRC"/
+                      else
+                        echo "未检测到挂载，使用 docker cp"
+                        docker exec ${{ env.CADDY_CONTAINER }} rm -rf /app/frontend/chat/dist
+                        docker exec ${{ env.CADDY_CONTAINER }} mkdir -p /app/frontend/chat/dist
+                        docker cp ${{ env.REMOTE_DIR }}/dist/. ${{ env.CADDY_CONTAINER }}:/app/frontend/chat/dist/
+                      fi
+
+                      echo "===== 4. 重载 Caddy 配置 ====="
+                      docker exec ${{ env.CADDY_CONTAINER }} caddy reload --config /etc/caddy/Caddyfile
+
+                      echo "===== 5. 清理临时文件 ====="
+                      rm -f ${{ env.REMOTE_DIR }}/server-image.tar
+
+                      echo "===== 6. 验证后端启动 ====="
+                      sleep 5
+                      docker logs --tail 20 ${{ env.IMAGE_NAME }}
+
+                      echo "===== 7. 清理舋空镜像（防止磁盘累积） ====="
+                      docker image prune -f
+                      docker system df

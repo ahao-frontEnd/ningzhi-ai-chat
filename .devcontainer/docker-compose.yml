@@ -1,0 +1,21 @@
+services:
+  # 应用部署相关
+  ningzhi-chat-server:
+    build:
+      context: ..
+      dockerfile: apps/server/Dockerfile
+    image: ningzhi-chat-server:latest
+    container_name: ningzhi-chat-server
+    ports:
+      - 3000:3000
+    restart: unless-stopped
+  # 代理相关
+  ningzhi-chat-caddy:
+      image: caddy:latest
+      container_name: ningzhi-chat-caddy
+      ports:
+        - 80:80
+        - 443:443
+      volumes:
+        - ./caddy:/etc/caddy
+        - ../apps/web/dist:/app/frontend/chat/dist
