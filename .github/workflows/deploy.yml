@@ -56,6 +56,13 @@ jobs:
             - name: Save image as tar
               run: docker save ${{ env.IMAGE_NAME }}:latest -o server-image.tar
 
+            - name: Fix tar file permissions
+              run: |
+                  # docker save 可能生成 root 权限文件，改为当前用户可读写
+                  sudo chown $USER:$USER server-image.tar
+                  chmod 644 server-image.tar
+                  ls -lh server-image.tar
+
             - name: Upload server image
               uses: appleboy/scp-action@v0.1.7
               with:
