@@ -20,8 +20,8 @@ jobs:
 
             - name: Setup pnpm
               uses: pnpm/action-setup@v4
-              with:
-                  version: 10
+              # 不指定 version，自动从 package.json 的 packageManager 字段读取
+              # 与项目本地 pnpm 版本保持一致，避免版本漂移
 
             - name: Setup Node.js
               uses: actions/setup-node@v4
