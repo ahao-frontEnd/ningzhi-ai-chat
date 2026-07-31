@@ -13,7 +13,7 @@
         "experimentalDecorators": true,
         "resolveJsonModule": true, // 允许导入 JSON 文件，TypeScript 会将 JSON 文件视为一个模块，并且会根据 JSON 文件的内容自动推断类型
         "moduleResolution": "node", // 使用 Node.js 模块解析策略，允许使用 Node.js 风格的模块导入路径
-        "ignoreDeprecations": "6.0", // 忽略 TypeScript 6.0 版本中的弃用警告，允许继续使用已弃用的功能而不会收到编译错误
+        // "ignoreDeprecations": "6.0", // 忽略 TypeScript 6.0 版本中的弃用警告，允许继续使用已弃用的功能而不会收到编译错误
         "noEmit": true // 不生成编译输出文件，此 tsconfig 仅作为基础配置供 eslint 及子项目继承使用
     },
     "$schema": "https://json.schemastore.org/tsconfig", // 指定 tsconfig.json 的 JSON Schema，提供编辑器的智能提示和验证功能, 这个是官方提供的 JSON Schema 地址，可以帮助编辑器识别 tsconfig.json 的结构和属性，提供自动补全和错误提示功能

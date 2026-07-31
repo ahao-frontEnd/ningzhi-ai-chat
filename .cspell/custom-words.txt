@@ -11,8 +11,12 @@ DEEPSEEK
 Echarts
 eslintcache
 healthcheck
+kwargs
+langchain
+langgraph
 meego
 miserables
+Mobi
 ningzhi
 njsproj
 ntvs
