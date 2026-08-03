@@ -39,7 +39,7 @@ function onEnter(e: KeyboardEvent) {
     <div class="chat-page">
         <header class="header">
             <div class="header-logo">🤖</div>
-            <div class="header-title">Ningzhi AI 聊天助手</div>
+            <div class="header-title">Ningzhi AI 聊天助手 testCicd 0803</div>
             <div class="header-status" :class="{ active: !store.loading }"></div>
         </header>
 
